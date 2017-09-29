@@ -1,6 +1,6 @@
 const util = require('../../utils/util.js')
 const defaultLogName = {
-  work: '工作',
+  work: '巡河',
   rest: '休息'
 }
 const actionName = {
@@ -12,9 +12,22 @@ const initDeg = {
   left: 45,
   right: -45,
 }
+// 可以通过 wx.getSetting 先查询一下用户是否授权了 "scope.record" 这个 scope
+wx.getSetting({
+  success(res) {
+    if (!res.authSetting['scope.userLocation']) {
+      wx.authorize({
+        scope: 'scope.userLocation',
+        success() {
+          // 用户已经同意小程序使用定位功能，后续调用 wx.getLocation 接口不会弹窗询问
+
+        }
+      })
+    }
+  }
+})
 
 Page({
-
   data: {
     remainTimeText: '',
     timerType: 'work',
@@ -25,7 +38,7 @@ Page({
     rightDeg: initDeg.right
   },
 
-  onShow: function() {
+  onShow: function () {
     if (this.data.isRuning) return
     let workTime = util.formatTime(wx.getStorageSync('workTime'), 'HH')
     let restTime = util.formatTime(wx.getStorageSync('restTime'), 'HH')
@@ -36,7 +49,7 @@ Page({
     })
   },
 
-  startTimer: function(e) {
+  startTimer: function (e) {
     let startTime = Date.now()
     let isRuning = this.data.isRuning
     let timerType = e.target.dataset.type
@@ -45,10 +58,11 @@ Page({
     let logName = this.logName || defaultLogName[timerType]
 
     if (!isRuning) {
-      this.timer = setInterval((function() {
+      this.timer = setInterval((function () {
         this.updateTimer()
         this.startNameAnimation()
       }).bind(this), 1000)
+      this.collectLocation()
     } else {
       this.stopTimer()
     }
@@ -73,7 +87,7 @@ Page({
     this.saveLog(this.data.log)
   },
 
-  startNameAnimation: function() {
+  startNameAnimation: function () {
     let animation = wx.createAnimation({
       duration: 450
     })
@@ -84,7 +98,7 @@ Page({
     })
   },
 
-  stopTimer: function() {
+  stopTimer: function () {
     // reset circle progress
     this.setData({
       leftDeg: initDeg.left,
@@ -95,7 +109,7 @@ Page({
     this.timer && clearInterval(this.timer)
   },
 
-  updateTimer: function() {
+  updateTimer: function () {
     let log = this.data.log
     let now = Date.now()
     let remainingTime = Math.round((log.endTime - now) / 1000)
@@ -103,6 +117,13 @@ Page({
     let M = util.formatTime(Math.floor(remainingTime / (60)) % 60, 'MM')
     let S = util.formatTime(Math.floor(remainingTime) % 60, 'SS')
     let halfTime
+
+    //collect location
+    let passedTime = Math.round((now - log.startTime) / 1000)
+    // let ss = util.formatTime(Math.floor(remainingTime) % 60, 'SS')
+    if (passedTime % (this.data['restTime'] * 60) == 0) {
+      this.collectLocation()
+    }
 
     // update text
     if (remainingTime > 0) {
@@ -132,13 +153,30 @@ Page({
         rightDeg: initDeg.right - (180 * (now - (log.startTime + halfTime)) / halfTime)
       })
     }
-  },
 
-  changeLogName: function(e) {
+
+  },
+  //收集一次用户位置信息
+  collectLocation: function () {
+    wx.getLocation({
+      type: 'wgs84',
+      success: function (res) {
+        res.time = Date.now()
+        let latlong = wx.getStorageSync('latlong') || []
+        latlong.unshift(res)
+        wx.setStorageSync('latlong', latlong)
+      },
+      fail: function (res) {
+        //TODO:定位失败
+        console.debug(res)
+      }
+    })
+  },
+  changeLogName: function (e) {
     this.logName = e.detail.value
   },
 
-  saveLog: function(log) {
+  saveLog: function (log) {
     var logs = wx.getStorageSync('logs') || []
     logs.unshift(log)
     wx.setStorageSync('logs', logs)
