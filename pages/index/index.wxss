@@ -141,7 +141,9 @@
   background-color: #48c23d;
 }
 
-.timer .timer_ctrl text {}
+.timer .timer_ctrl text {
+  
+}
 
 
 /*runing style*/

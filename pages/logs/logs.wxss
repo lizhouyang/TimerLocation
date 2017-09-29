@@ -1,6 +1,5 @@
 .container{
 	padding-bottom: 50px;
-	max-height: 92%;
 }
 .log {
 	color: #999;
@@ -13,7 +12,7 @@
 	padding-right: 20px;
 }
 .clear{
-	position: absolute;
+	position: fixed;
 	bottom: 0px;
 	width: 100%;
 }
@@ -24,4 +23,6 @@
 	color:#fff;
 	background-color: #fd8f58;
 	border-radius: 2px;
+  float: right;
+  margin-right: 30px;
 }

@@ -11,7 +11,7 @@ module.exports = {
       moment.locale('en', {
         longDateFormat: {
           l: "YYYY-MM-DD",
-          L: "YYYY-MM-DD HH:mm"
+          L: "YYYY-MM-DD HH:mm:ss"
         }
       });
       if (format == undefined) { format = 'L' }
