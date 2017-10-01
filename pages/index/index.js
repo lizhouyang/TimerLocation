@@ -39,7 +39,8 @@ Page({
   },
 
   onShow: function () {
-    if (this.data.isRuning) return
+    let isRuning = getApp().isRuning
+    if (isRuning) return
     let workTime = util.formatTime(wx.getStorageSync('workTime'), 'HH')
     let restTime = util.formatTime(wx.getStorageSync('restTime'), 'HH')
     this.setData({
@@ -50,23 +51,23 @@ Page({
   },
 
   startTimer: function (e) {
+    var appInstance = getApp()
+    let isRuning = appInstance.isRuning
     let startTime = Date.now()
-    let isRuning = this.data.isRuning
-    let timerType = e.target.dataset.type
-    let showTime = this.data[timerType + 'Time']
+    let timerType = 'workTime'
+    let showTime = this.data['workTime']
     let keepTime = showTime * 60 * 1000
     let logName = this.logName || defaultLogName[timerType]
-    let locationInterval = this.data['restTime'] * 60 * 1000
+
     if (!isRuning) {
+      appInstance.isRuning = true      
       this.timer = setInterval((function () {
         this.updateTimer()
-        this.startNameAnimation()
       }).bind(this), 1000)
-
-      //立即执行一次
-      this.locationAndStor()
-      this.locationTimer = setTimeout(this.collectLocation.bind(this), locationInterval)
-
+      appInstance.startCollectLocation()
+      wx.setNavigationBarTitle({
+        title:'巡河中'
+      })
     } else {
       this.stopTimer()
     }
@@ -91,28 +92,24 @@ Page({
     this.saveLog(this.data.log)
   },
 
-  startNameAnimation: function () {
-    let animation = wx.createAnimation({
-      duration: 450
-    })
-    animation.opacity(0.2).step()
-    animation.opacity(1).step()
-    this.setData({
-      nameAnimation: animation.export()
-    })
-  },
+
 
   stopTimer: function () {
+    // clear locaion timer
+    var appInstance = getApp()
+    let globalLocationTimer = appInstance.globalLocationTimer
+    appInstance.isRuning = false
+    globalLocationTimer && clearTimeout(globalLocationTimer)
     // reset circle progress
     this.setData({
       leftDeg: initDeg.left,
       rightDeg: initDeg.right
     })
-
     // clear timer
     this.timer && clearInterval(this.timer)
-    // clear location timer
-    this.locationTimer && clearTimeout(this.locationTimer)
+    wx.setNavigationBarTitle({
+      title: ''
+    })
   },
 
   updateTimer: function () {
@@ -155,29 +152,8 @@ Page({
 
 
   },
-  //收集一次用户位置信息
-  collectLocation: function () {
-    this.locationAndStor()
-    //设置下次运行
-    let locationInterval = this.data['restTime'] * 60 * 1000
-    this.locationTimer = setTimeout(this.collectLocation.bind(this), locationInterval)
 
-  },
-  locationAndStor:function(){
-    wx.getLocation({
-      type: 'wgs84',
-      success: function (res) {
-        res.time = Date.now()
-        let latlong = wx.getStorageSync('latlong') || []
-        latlong.unshift(res)
-        wx.setStorageSync('latlong', latlong)
-      },
-      fail: function (res) {
-        //TODO:定位失败
-        console.debug(res)
-      }
-    })
-  },
+
   changeLogName: function (e) {
     this.logName = e.detail.value
   },

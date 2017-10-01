@@ -1,7 +1,6 @@
 <view class="container timer {{isRuning ? 'timer--runing': ''}}">
   <view class="timer_main">
     <view class="timer_time-wrap">
-      <text wx:if="{{isRuning}}" animation="{{nameAnimation}}" class="timer_taskName">{{taskName}}{{completed ? '已完成！' : '中'}}</text>
       <view class="timer_progress_mask"></view>
       <view class="timer_progress timer_left">
         <view class="timer_circle timer_circle--left" style="transform: rotate({{leftDeg}}deg);"></view>

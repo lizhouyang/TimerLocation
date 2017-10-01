@@ -17,8 +17,8 @@ Page({
   getLogs: function () {
     let logs = wx.getStorageSync('latlong') || []
     logs.forEach(function (item, index, arry) {
-      item.time = util.dateFormat(new Date(item.time))
-      // item.time = new Date(item.time).toLocaleString()
+      item.time = util.dateFormat(new Date(item.time),'h:mm:ss')
+      item.timeStamp = util.dateFormat(new Date(item.timeStamp),'h:mm:ss')
     })
     this.setData({
       logs: logs

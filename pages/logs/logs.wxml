@@ -2,7 +2,8 @@
 	<scroll-view class="container" scroll-y="true">
   <view class="log panel">
 	  	<view class="log_item">
-	  		<text class="log_start">时间</text>
+        <text class="log_start">开始定位时间</text>
+	  		<text class="log_start">定位时间</text>
 	  		<text class="log_action">经度</text>
 	  		<text class="log_action">纬度</text>
         <text class="log_action">定位误差</text>
@@ -10,6 +11,7 @@
 	  </view>
 	  <view class="log panel">
 	  	<view class="log_item" wx:for="{{logs}}" wx:for-index="$index" wx:for-item="log">
+        <text class="log_start">{{log.timeStamp}}</text>
 	  		<text class="log_start">{{log.time}}</text>
 	  		<text class="log_action">{{log.longitude}}</text>
 	  		<text class="log_action">{{log.latitude}}</text>
