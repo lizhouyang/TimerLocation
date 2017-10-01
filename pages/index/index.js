@@ -65,6 +65,7 @@ Page({
         this.updateTimer()
       }).bind(this), 1000)
       appInstance.startCollectLocation()
+      appInstance.collectLocation()
       wx.setNavigationBarTitle({
         title:'巡河中'
       })

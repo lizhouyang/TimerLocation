@@ -25,19 +25,17 @@ App({
   isRuning: false,
   //开始记录位置
   startCollectLocation: function () {
-    let collectionTimeStamp = Date.now()
-    this.logLocation(collectionTimeStamp)
-    
+    let collectionTimeStamp = Date.now()    
     let restTime = wx.getStorageSync('restTime') * 1000 * 60
     this.globalLocationTimer = setTimeout((function () {
       this.collectLocation()
+      this.startCollectLocation()
     }).bind(this), restTime);
   },
   //收集一次用户位置信息
   collectLocation: function () {
     let collectionTimeStamp = Date.now()
     this.logLocation(collectionTimeStamp)
-    this.startCollectLocation()
   },
   logLocation: function (collectionTimeStamp){
     wx.getLocation({
