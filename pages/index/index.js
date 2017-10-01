@@ -56,13 +56,17 @@ Page({
     let showTime = this.data[timerType + 'Time']
     let keepTime = showTime * 60 * 1000
     let logName = this.logName || defaultLogName[timerType]
-
+    let locationInterval = this.data['restTime'] * 60 * 1000
     if (!isRuning) {
       this.timer = setInterval((function () {
         this.updateTimer()
         this.startNameAnimation()
       }).bind(this), 1000)
-      this.collectLocation()
+
+      //立即执行一次
+      this.locationAndStor()
+      this.locationTimer = setTimeout(this.collectLocation.bind(this), locationInterval)
+
     } else {
       this.stopTimer()
     }
@@ -107,6 +111,8 @@ Page({
 
     // clear timer
     this.timer && clearInterval(this.timer)
+    // clear location timer
+    this.locationTimer && clearTimeout(this.locationTimer)
   },
 
   updateTimer: function () {
@@ -117,13 +123,6 @@ Page({
     let M = util.formatTime(Math.floor(remainingTime / (60)) % 60, 'MM')
     let S = util.formatTime(Math.floor(remainingTime) % 60, 'SS')
     let halfTime
-
-    //collect location
-    let passedTime = Math.round((now - log.startTime) / 1000)
-    // let ss = util.formatTime(Math.floor(remainingTime) % 60, 'SS')
-    if (passedTime % (this.data['restTime'] * 60) == 0) {
-      this.collectLocation()
-    }
 
     // update text
     if (remainingTime > 0) {
@@ -158,6 +157,13 @@ Page({
   },
   //收集一次用户位置信息
   collectLocation: function () {
+    this.locationAndStor()
+    //设置下次运行
+    let locationInterval = this.data['restTime'] * 60 * 1000
+    this.locationTimer = setTimeout(this.collectLocation.bind(this), locationInterval)
+
+  },
+  locationAndStor:function(){
     wx.getLocation({
       type: 'wgs84',
       success: function (res) {

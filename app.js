@@ -1,7 +1,7 @@
 //app.js
 const defaultTime = {
   defaultWorkTime: 25,
-  defaultRestTime: 5
+  defaultRestTime: 3
 }
 
 App({

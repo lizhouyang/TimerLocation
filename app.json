@@ -30,6 +30,7 @@
       "iconPath": "image/wechat.png",
       "selectedIconPath": "image/wechatHL.png",
       "text": "设置"
-    }]
+    }],
+    "debug":true
   }
 }
